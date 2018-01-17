@@ -85,7 +85,7 @@ private:
 };
 
 template <typename StringListT>
-std::vector<std::unique_ptr<IBlockBase>> createFlow(const StringListT& blockNames)
+std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
 {
 	BlockFactory factory;
 	factory.Register<BlockA>("A");
@@ -116,7 +116,7 @@ int main()
 		std::cout << "elem='" << node << "'" << std::endl;
 	}
 
-	auto flow = createFlow(nodes);
+	auto flow = CreateFlow(nodes);
 
 	return 0;
 }
