@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <map>
+#include <memory>
+#include <algorithm>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -56,6 +57,30 @@ struct BlockD : public IBlock<Triangle>
 	void OnReceive(const Triangle&) override
 	{}
 };
+
+template <typename StringT>
+std::unique_ptr<IBlockBase> createBlock(const StringT& name)
+{
+	return {};
+}
+
+template <typename StringListT>
+std::vector<std::unique_ptr<IBlockBase>> createFlow(const StringListT& blockNames)
+{
+	std::vector<std::unique_ptr<IBlockBase>> blocks;
+
+	for (auto it = blockNames.crbegin(); it != blockNames.crend(); ++it)
+	{
+		using StringT = typename  StringListT::value_type;
+		const StringT& blockName = *it;
+
+		auto newBlock = createBlock(blockName);
+		blocks.push_back(std::move(newBlock));
+	}
+
+	std::reverse(blocks.begin(), blocks.end());
+	return blocks;
+}
 
 int main()
 {
