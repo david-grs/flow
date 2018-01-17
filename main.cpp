@@ -60,27 +60,37 @@ struct BlockD : public IBlock<Triangle>
 	{}
 };
 
-using BlockCreator = std::function<std::unique_ptr<IBlockBase>()>;
-
-static std::map<std::string, BlockCreator> BlockFactory
+struct BlockFactory
 {
-	{"A", []() { return std::make_unique<BlockA>(); }},
-	{"B", []() { return std::make_unique<BlockB>(); }}
+	std::unique_ptr<IBlockBase> Create(const std::string& name)
+	{
+		auto it = mCreators.find(name);
+		if (it == mCreators.cend())
+			throw std::runtime_error("unknown block name: " + name);
+
+		return it->second();
+	}
+
+	template <typename BlockT>
+	bool Register(const std::string& name)
+	{
+		auto p = mCreators.emplace(name, []() { return std::make_unique<BlockT>(); });
+		return p.second;
+	}
+
+private:
+	using BlockCreator = std::function<std::unique_ptr<IBlockBase>()>;
+
+	std::map<std::string, BlockCreator> mCreators;
 };
-
-template <typename StringT>
-std::unique_ptr<IBlockBase> createBlock(const StringT& name)
-{
-	auto it = BlockFactory.find(name);
-	if (it == BlockFactory.cend())
-		throw std::runtime_error("unknown block type: " + name);
-
-	return it->second();
-}
 
 template <typename StringListT>
 std::vector<std::unique_ptr<IBlockBase>> createFlow(const StringListT& blockNames)
 {
+	BlockFactory factory;
+	factory.Register<BlockA>("A");
+	factory.Register<BlockB>("B");
+
 	std::vector<std::unique_ptr<IBlockBase>> blocks;
 
 	for (auto it = blockNames.crbegin(); it != blockNames.crend(); ++it)
@@ -88,7 +98,7 @@ std::vector<std::unique_ptr<IBlockBase>> createFlow(const StringListT& blockName
 		using StringT = typename  StringListT::value_type;
 		const StringT& blockName = *it;
 
-		auto newBlock = createBlock(blockName);
+		auto newBlock = factory.Create(blockName);
 		blocks.push_back(std::move(newBlock));
 	}
 
