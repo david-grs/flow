@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
 #include <algorithm>
+#include <functional>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -58,10 +60,22 @@ struct BlockD : public IBlock<Triangle>
 	{}
 };
 
+using BlockCreator = std::function<std::unique_ptr<IBlockBase>()>;
+
+static std::map<std::string, BlockCreator> BlockFactory
+{
+	{"A", []() { return std::make_unique<BlockA>(); }},
+	{"B", []() { return std::make_unique<BlockB>(); }}
+};
+
 template <typename StringT>
 std::unique_ptr<IBlockBase> createBlock(const StringT& name)
 {
-	return {};
+	auto it = BlockFactory.find(name);
+	if (it == BlockFactory.cend())
+		throw std::runtime_error("unknown block type: " + name);
+
+	return it->second();
 }
 
 template <typename StringListT>
@@ -91,6 +105,8 @@ int main()
 	{
 		std::cout << "elem='" << node << "'" << std::endl;
 	}
+
+	auto flow = createFlow(nodes);
 
 	return 0;
 }
