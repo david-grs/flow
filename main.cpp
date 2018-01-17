@@ -16,6 +16,8 @@ struct IBlockBase
 	virtual ~IBlockBase()
 	{}
 
+	virtual const std::string& GetBlockName() const =0;
+
 	template <typename ObjectT>
 	void Send(const ObjectT&)
 	{
@@ -23,11 +25,13 @@ struct IBlockBase
 	}
 };
 
-template <typename ObjectT>
+template <typename BlockT, typename ObjectT>
 struct IBlock : public IBlockBase
 {
 	virtual ~IBlock()
 	{}
+
+	const std::string& GetBlockName() const { return BlockT::GetName(); }
 
 	virtual void OnReceive(const ObjectT&) =0;
 };
@@ -36,25 +40,29 @@ struct Square{};
 struct Triangle{};
 struct Circle{};
 
-struct BlockA : public IBlock<Square>
+struct BlockA : public IBlock<BlockA, Square>
 {
+	static const std::string& GetName() { static const std::string name = "A"; return name; }
+
 	void OnReceive(const Square&) override
 	{}
 };
 
-struct BlockB : public IBlock<Triangle>
+struct BlockB : public IBlock<BlockB, Triangle>
 {
+	static const std::string& GetName() { static const std::string name = "B"; return name; }
+
 	void OnReceive(const Triangle&) override
 	{}
 };
 
-struct BlockC : public IBlock<Circle>
+struct BlockC : public IBlock<BlockC, Circle>
 {
 	void OnReceive(const Circle&) override
 	{}
 };
 
-struct BlockD : public IBlock<Triangle>
+struct BlockD : public IBlock<BlockD, Triangle>
 {
 	void OnReceive(const Triangle&) override
 	{}
@@ -72,9 +80,9 @@ struct BlockFactory
 	}
 
 	template <typename BlockT>
-	bool Register(const std::string& name)
+	bool Register()
 	{
-		auto p = mCreators.emplace(name, []() { return std::make_unique<BlockT>(); });
+		auto p = mCreators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
 		return p.second;
 	}
 
@@ -88,8 +96,8 @@ template <typename StringListT>
 std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
 {
 	BlockFactory factory;
-	factory.Register<BlockA>("A");
-	factory.Register<BlockB>("B");
+	factory.Register<BlockA>();
+	factory.Register<BlockB>();
 
 	std::vector<std::unique_ptr<IBlockBase>> blocks;
 
@@ -111,12 +119,12 @@ int main()
 	std::vector<std::string> nodes;
 	boost::split(nodes, config, boost::is_any_of("-"));
 
-	for (const auto& node : nodes)
-	{
-		std::cout << "elem='" << node << "'" << std::endl;
-	}
-
 	auto flow = CreateFlow(nodes);
+
+	for (const auto& block : flow)
+	{
+		std::cout << "elem='" << block->GetBlockName() << "'" << std::endl;
+	}
 
 	return 0;
 }
