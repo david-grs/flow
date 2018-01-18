@@ -1,5 +1,7 @@
-#include <iostream>
+#include "typemap.hpp"
+
 #include <string>
+#include <iostream>
 #include <vector>
 #include <map>
 #include <memory>
@@ -19,19 +21,23 @@ struct IBlockBase
 	virtual const std::string& GetBlockName() const =0;
 };
 
-template <typename BlockT, typename ConsumeT, typename ProduceT>
+template <typename BlockT, typename InputT, typename OutputT>
 struct IBlock : public IBlockBase
 {
+	using block_type = BlockT;
+	using input_type = InputT;
+	using output_type = OutputT;
+
 	virtual ~IBlock()
 	{}
 
 	const std::string& GetBlockName() const { return BlockT::GetName(); }
 
-	virtual void OnReceive(const ConsumeT&) =0;
+	virtual void OnReceive(const InputT&) =0;
 
-	void Send(const ProduceT&)
+	void Send(const OutputT&)
 	{
-		//TODO
+		// TODO
 	}
 };
 
@@ -71,10 +77,25 @@ struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 	{}
 };
 
+template <typename... Args>
 struct BlockFactory
 {
-	std::unique_ptr<IBlockBase> Create(const std::string& name)
+	template <typename ProduceT>
+	std::unique_ptr<IBlockBase> CreateProducer(const std::string& name)
 	{
+		// TODO take mCreators from typemap ProduceT
+
+		auto it = mCreators.find(name);
+		if (it == mCreators.cend())
+			throw std::runtime_error("unknown block name: " + name);
+
+		return it->second();
+	}
+
+	std::unique_ptr<IBlockBase> CreateLeaf(const std::string& name)
+	{
+		// TODO take mCreators from typemap ProduceT
+
 		auto it = mCreators.find(name);
 		if (it == mCreators.cend())
 			throw std::runtime_error("unknown block name: " + name);
@@ -85,20 +106,24 @@ struct BlockFactory
 	template <typename BlockT>
 	bool Register()
 	{
-		auto p = mCreators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
+		using OutputType = typename BlockT::output_type;
+
+		auto& creators = mCreators.template Get<OutputType>();
+
+		auto p = creators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
 		return p.second;
 	}
 
 private:
 	using BlockCreator = std::function<std::unique_ptr<IBlockBase>()>;
 
-	std::map<std::string, BlockCreator> mCreators;
+	TypeMap<std::map<std::string, BlockCreator>, Args...> mCreators;
 };
 
 template <typename StringListT>
 std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
 {
-	BlockFactory factory;
+	BlockFactory<Square, Triangle, Circle> factory;
 	factory.Register<BlockA>();
 	factory.Register<BlockB>();
 	factory.Register<BlockC>();
@@ -111,7 +136,7 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 		using StringT = typename  StringListT::value_type;
 		const StringT& blockName = *it;
 
-		auto newBlock = factory.Create(blockName);
+		auto newBlock = factory.CreateProducer(blockName);
 		blocks.push_back(std::move(newBlock));
 	}
 
