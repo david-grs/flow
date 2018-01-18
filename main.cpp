@@ -17,15 +17,9 @@ struct IBlockBase
 	{}
 
 	virtual const std::string& GetBlockName() const =0;
-
-	template <typename ObjectT>
-	void Send(const ObjectT&)
-	{
-		//TODO
-	}
 };
 
-template <typename BlockT, typename ObjectT>
+template <typename BlockT, typename ConsumeT, typename ProduceT>
 struct IBlock : public IBlockBase
 {
 	virtual ~IBlock()
@@ -33,14 +27,19 @@ struct IBlock : public IBlockBase
 
 	const std::string& GetBlockName() const { return BlockT::GetName(); }
 
-	virtual void OnReceive(const ObjectT&) =0;
+	virtual void OnReceive(const ConsumeT&) =0;
+
+	void Send(const ProduceT&)
+	{
+		//TODO
+	}
 };
 
 struct Square{};
 struct Triangle{};
 struct Circle{};
 
-struct BlockA : public IBlock<BlockA, Square>
+struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
 	static const std::string& GetName() { static const std::string name = "A"; return name; }
 
@@ -48,7 +47,7 @@ struct BlockA : public IBlock<BlockA, Square>
 	{}
 };
 
-struct BlockB : public IBlock<BlockB, Triangle>
+struct BlockB : public IBlock<BlockB, Triangle, Circle>
 {
 	static const std::string& GetName() { static const std::string name = "B"; return name; }
 
@@ -56,13 +55,13 @@ struct BlockB : public IBlock<BlockB, Triangle>
 	{}
 };
 
-struct BlockC : public IBlock<BlockC, Circle>
+struct BlockC : public IBlock<BlockC, Circle, Square>
 {
 	void OnReceive(const Circle&) override
 	{}
 };
 
-struct BlockD : public IBlock<BlockD, Triangle>
+struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
 	void OnReceive(const Triangle&) override
 	{}
