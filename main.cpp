@@ -97,6 +97,8 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 	BlockFactory factory;
 	factory.Register<BlockA>();
 	factory.Register<BlockB>();
+	factory.Register<BlockC>();
+	factory.Register<BlockD>();
 
 	std::vector<std::unique_ptr<IBlockBase>> blocks;
 
