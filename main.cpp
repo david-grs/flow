@@ -1,5 +1,8 @@
 #include "typemap.hpp"
 
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -7,9 +10,6 @@
 #include <memory>
 #include <algorithm>
 #include <functional>
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
 
 const std::string config = "A-B";
 

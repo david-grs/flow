@@ -1,5 +1,8 @@
 #pragma once
 
+#include <tuple>
+#include <vector>
+
 template <typename T, typename... Args>
 struct TypeMap
 {
