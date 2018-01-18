@@ -57,12 +57,16 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 struct BlockC : public IBlock<BlockC, Circle, Square>
 {
+	static const std::string& GetName() { static const std::string name = "C"; return name; }
+
 	void OnReceive(const Circle&) override
 	{}
 };
 
 struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
+	static const std::string& GetName() { static const std::string name = "D"; return name; }
+
 	void OnReceive(const Triangle&) override
 	{}
 };
