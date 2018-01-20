@@ -96,10 +96,9 @@ struct BlockFactory
 	}
 
 	template <typename BlockT>
-	bool Register()
+	void Register()
 	{
 		auto p = mCreators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
-		return p.second;
 	}
 
 private:
