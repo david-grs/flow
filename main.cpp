@@ -98,7 +98,7 @@ struct BlockFactory
 	template <typename BlockT>
 	void Register()
 	{
-		auto p = mCreators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
+		mCreators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
 	}
 
 private:
