@@ -18,11 +18,17 @@ struct IBlockBase
 	virtual ~IBlockBase()
 	{}
 
+	virtual bool IsValidParent(IBlockBase*) const { return false; }
 	virtual const std::string& GetBlockName() const =0;
 };
 
+template <typename OutputT>
+struct IBlockSender : public IBlockBase
+{
+};
+
 template <typename BlockT, typename InputT, typename OutputT>
-struct IBlock : public IBlockBase
+struct IBlock : public IBlockSender<OutputT>
 {
 	using block_type = BlockT;
 	using input_type = InputT;
@@ -31,6 +37,7 @@ struct IBlock : public IBlockBase
 	virtual ~IBlock()
 	{}
 
+	bool IsValidParent(IBlockBase* blk) const override final { return dynamic_cast<IBlockSender<InputT>*>(blk); }
 	const std::string& GetBlockName() const { return BlockT::GetName(); }
 
 	virtual void OnReceive(const InputT&) =0;
@@ -150,6 +157,15 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 
 int main()
 {
+	IBlockBase* blkA = new BlockA;
+	IBlockBase* blkB = new BlockB;
+	IBlockBase* blkC = new BlockC;
+
+	std::cout << std::boolalpha << blkC->IsValidParent(blkA) << std::endl;
+
+
+
+#if 0
 	std::vector<std::string> nodes;
 	boost::split(nodes, config, boost::is_any_of("-"));
 
@@ -159,6 +175,6 @@ int main()
 	{
 		std::cout << "elem='" << block->GetBlockName() << "'" << std::endl;
 	}
-
+#endif
 	return 0;
 }
