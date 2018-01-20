@@ -84,25 +84,10 @@ struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 	{}
 };
 
-template <typename... Args>
 struct BlockFactory
 {
-	template <typename ProduceT>
-	std::unique_ptr<IBlockBase> CreateProducer(const std::string& name)
+	std::unique_ptr<IBlockBase> Create(const std::string& name)
 	{
-		// TODO take mCreators from typemap ProduceT
-
-		auto it = mCreators.find(name);
-		if (it == mCreators.cend())
-			throw std::runtime_error("unknown block name: " + name);
-
-		return it->second();
-	}
-
-	std::unique_ptr<IBlockBase> CreateLeaf(const std::string& name)
-	{
-		// TODO take mCreators from typemap ProduceT
-
 		auto it = mCreators.find(name);
 		if (it == mCreators.cend())
 			throw std::runtime_error("unknown block name: " + name);
@@ -113,42 +98,34 @@ struct BlockFactory
 	template <typename BlockT>
 	bool Register()
 	{
-		using OutputType = typename BlockT::output_type;
-
-		auto& creators = mCreators.template Get<OutputType>();
-
-		auto p = creators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
+		auto p = mCreators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
 		return p.second;
 	}
 
 private:
 	using BlockCreator = std::function<std::unique_ptr<IBlockBase>()>;
 
-	TypeMap<std::map<std::string, BlockCreator>, Args...> mCreators;
+	std::map<std::string, BlockCreator> mCreators;
 };
 
 template <typename StringListT>
 std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
 {
-	BlockFactory<Square, Triangle, Circle> factory;
+	BlockFactory factory;
 	factory.Register<BlockA>();
 	factory.Register<BlockB>();
 	factory.Register<BlockC>();
 	factory.Register<BlockD>();
 
-	using StringT = typename  StringListT::value_type;
-
 	std::vector<std::unique_ptr<IBlockBase>> blocks;
 
-	auto it = blockNames.crbegin();
-	//const StringT& blockName = *it;
-
-	//auto newBlock = factory.CreateLeaf(blockName);
-	//blocks.push_back(std::move(newBlock));
-
-	for (; it != blockNames.crend(); ++it)
+	for (auto it = blockNames.crbegin(); it != blockNames.crend(); ++it)
 	{
+		using StringT = typename  StringListT::value_type;
+		const StringT& blockName = *it;
 
+		auto newBlock = factory.Create(blockName);
+		blocks.push_back(std::move(newBlock));
 	}
 
 	std::reverse(blocks.begin(), blocks.end());
@@ -157,15 +134,6 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 
 int main()
 {
-	IBlockBase* blkA = new BlockA;
-	IBlockBase* blkB = new BlockB;
-	IBlockBase* blkC = new BlockC;
-
-	std::cout << std::boolalpha << blkC->IsValidParent(blkA) << std::endl;
-
-
-
-#if 0
 	std::vector<std::string> nodes;
 	boost::split(nodes, config, boost::is_any_of("-"));
 
@@ -175,6 +143,6 @@ int main()
 	{
 		std::cout << "elem='" << block->GetBlockName() << "'" << std::endl;
 	}
-#endif
+
 	return 0;
 }
