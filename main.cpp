@@ -124,6 +124,12 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 		const StringT& blockName = *it;
 
 		auto newBlock = factory.Create(blockName);
+
+		if (!blocks.empty() && !blocks.back()->IsValidParent(newBlock.get()))
+		{
+			throw std::runtime_error("invalid link " + newBlock->GetBlockName() + "->" + blocks.back()->GetBlockName());
+		}
+
 		blocks.push_back(std::move(newBlock));
 	}
 
