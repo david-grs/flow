@@ -129,15 +129,19 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 	factory.Register<BlockC>();
 	factory.Register<BlockD>();
 
+	using StringT = typename  StringListT::value_type;
+
 	std::vector<std::unique_ptr<IBlockBase>> blocks;
 
-	for (auto it = blockNames.crbegin(); it != blockNames.crend(); ++it)
-	{
-		using StringT = typename  StringListT::value_type;
-		const StringT& blockName = *it;
+	auto it = blockNames.crbegin();
+	//const StringT& blockName = *it;
 
-		auto newBlock = factory.CreateProducer(blockName);
-		blocks.push_back(std::move(newBlock));
+	//auto newBlock = factory.CreateLeaf(blockName);
+	//blocks.push_back(std::move(newBlock));
+
+	for (; it != blockNames.crend(); ++it)
+	{
+
 	}
 
 	std::reverse(blocks.begin(), blocks.end());
