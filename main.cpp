@@ -23,12 +23,14 @@ struct IBlockBase
 };
 
 template <typename OutputT>
-struct IBlockSender : public IBlockBase
+struct IBlockProducer : public IBlockBase
 {
+	virtual ~IBlockProducer()
+	{}
 };
 
 template <typename BlockT, typename InputT, typename OutputT>
-struct IBlock : public IBlockSender<OutputT>
+struct IBlock : public IBlockProducer<OutputT>
 {
 	using block_type = BlockT;
 	using input_type = InputT;
@@ -37,7 +39,7 @@ struct IBlock : public IBlockSender<OutputT>
 	virtual ~IBlock()
 	{}
 
-	bool IsValidParent(IBlockBase* blk) const override final { return dynamic_cast<IBlockSender<InputT>*>(blk); }
+	bool IsValidParent(IBlockBase* blk) const override final { return dynamic_cast<IBlockProducer<InputT>*>(blk); }
 	const std::string& GetBlockName() const { return BlockT::GetName(); }
 
 	virtual void OnReceive(const InputT&) =0;
