@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <functional>
 
-const std::string config = "A-B";
+const std::string config = "A-B-C";
 
 struct IBlockBase
 {
