@@ -86,6 +86,17 @@ struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 	{}
 };
 
+struct BlockRegistrar
+{
+	template <typename BlockT>
+	std::unique_ptr<IBlockBase> Register()
+	{
+		std::unique_ptr<BlockT> blk = std::make_unique<BlockT>();
+		return blk;
+	}
+};
+
+template <typename RegistrarT>
 struct BlockFactory
 {
 	std::unique_ptr<IBlockBase> Create(const std::string& name)
@@ -100,7 +111,10 @@ struct BlockFactory
 	template <typename BlockT>
 	void Register()
 	{
-		mCreators.emplace(BlockT::GetName(), []() { return std::make_unique<BlockT>(); });
+		mCreators.emplace(BlockT::GetName(), []()
+		{
+			return RegistrarT{}.template Register<BlockT>();
+		});
 	}
 
 private:
@@ -112,7 +126,7 @@ private:
 template <typename StringListT>
 std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
 {
-	BlockFactory factory;
+	BlockFactory<BlockRegistrar> factory;
 	factory.Register<BlockA>();
 	factory.Register<BlockB>();
 	factory.Register<BlockC>();
