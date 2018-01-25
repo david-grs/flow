@@ -100,7 +100,7 @@ template <typename ChildBlockT>
 bool IsValidParent(IBlockBase* parent)
 {
 	using InputT = typename ChildBlockT::input_type;
-	return dynamic_cast<IBlockProducer<InputT>*>(parent);
+	return dynamic_cast<IBlockProducer<InputT>*>(parent) != nullptr;
 }
 
 struct BlockCreator
@@ -160,9 +160,9 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 	for (const auto& blockName : blockNames)
 	{
 		auto newBlock = factory.Create(blockName, parent);
+		parent = newBlock.get();
 
 		blocks.push_back(std::move(newBlock));
-		parent = newBlock.get();
 	}
 
 	std::reverse(blocks.begin(), blocks.end());
