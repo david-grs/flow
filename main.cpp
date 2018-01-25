@@ -116,7 +116,7 @@ struct BlockCreator
 	}
 };
 
-template <typename RegistrarT>
+template <typename CreatorT>
 struct BlockFactory
 {
 	std::unique_ptr<IBlockBase> Create(const std::string& name, IBlockBase* parent)
@@ -133,7 +133,7 @@ struct BlockFactory
 	{
 		mCreators.emplace(BlockT::GetName(), [](IBlockBase* parent)
 		{
-			return RegistrarT{}.template Create<BlockT>(parent);
+			return CreatorT{}.template Create<BlockT>(parent);
 		});
 	}
 
@@ -152,21 +152,12 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 	factory.Register<BlockC>();
 	factory.Register<BlockD>();
 
-	std::vector<std::unique_ptr<IBlockBase>> blocks;
 	IBlockBase* parent = nullptr;
+	std::vector<std::unique_ptr<IBlockBase>> blocks;
 
-	//for (auto it = blockNames.crbegin(); it != blockNames.crend(); ++it)
-	//{
-	//	using StringT = typename StringListT::value_type;
-	//	const StringT& blockName = *it;
 	for (const auto& blockName : blockNames)
 	{
 		auto newBlock = factory.Create(blockName, parent);
-
-		//if (!blocks.empty() && !blocks.back()->IsValidParent(newBlock.get()))
-		//{
-		//	throw std::runtime_error("invalid link " + newBlock->GetBlockName() + "->" + blocks.back()->GetBlockName());
-		//}
 
 		blocks.push_back(std::move(newBlock));
 		parent = newBlock.get();
