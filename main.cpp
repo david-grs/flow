@@ -108,8 +108,10 @@ struct BlockCreator
 	template <typename BlockT>
 	std::unique_ptr<IBlockBase> Create(IBlockBase* parent)
 	{
-		if (!IsValidParent<BlockT>(parent))
+		if (parent && !IsValidParent<BlockT>(parent))
+		{
 			throw std::runtime_error("invalid link " + parent->GetBlockName() + "->" + BlockT::GetName());
+		}
 
 		std::unique_ptr<BlockT> blk = std::make_unique<BlockT>(parent);
 		return blk;
