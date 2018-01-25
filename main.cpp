@@ -18,7 +18,6 @@ struct IBlockBase
 	virtual ~IBlockBase()
 	{}
 
-	virtual bool IsValidParent(IBlockBase*) const { return false; }
 	virtual const std::string& GetBlockName() const =0;
 };
 
@@ -39,7 +38,6 @@ struct IBlock : public IBlockProducer<OutputT>
 	virtual ~IBlock()
 	{}
 
-	bool IsValidParent(IBlockBase* blk) const override final { return dynamic_cast<IBlockProducer<InputT>*>(blk); }
 	const std::string& GetBlockName() const { return BlockT::GetName(); }
 
 	virtual void OnReceive(const InputT&) =0;
@@ -56,6 +54,9 @@ struct Circle{};
 
 struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
+	BlockA(IBlockBase*)
+	{}
+
 	static const std::string& GetName() { static const std::string name = "A"; return name; }
 
 	void OnReceive(const Square&) override
@@ -64,6 +65,9 @@ struct BlockA : public IBlock<BlockA, Square, Triangle>
 
 struct BlockB : public IBlock<BlockB, Triangle, Circle>
 {
+	BlockB(IBlockBase*)
+	{}
+
 	static const std::string& GetName() { static const std::string name = "B"; return name; }
 
 	void OnReceive(const Triangle&) override
@@ -72,6 +76,9 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 struct BlockC : public IBlock<BlockC, Circle, Square>
 {
+	BlockC(IBlockBase*)
+	{}
+
 	static const std::string& GetName() { static const std::string name = "C"; return name; }
 
 	void OnReceive(const Circle&) override
@@ -80,18 +87,31 @@ struct BlockC : public IBlock<BlockC, Circle, Square>
 
 struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
+	BlockD(IBlockBase*)
+	{}
+
 	static const std::string& GetName() { static const std::string name = "D"; return name; }
 
 	void OnReceive(const Triangle&) override
 	{}
 };
 
+template <typename ChildBlockT>
+bool IsValidParent(IBlockBase* parent)
+{
+	using InputT = typename ChildBlockT::input_type;
+	return dynamic_cast<IBlockProducer<InputT>*>(parent);
+}
+
 struct BlockCreator
 {
 	template <typename BlockT>
-	std::unique_ptr<IBlockBase> Create()
+	std::unique_ptr<IBlockBase> Create(IBlockBase* parent)
 	{
-		std::unique_ptr<BlockT> blk = std::make_unique<BlockT>();
+		if (!IsValidParent<BlockT>(parent))
+			throw std::runtime_error("invalid link " + parent->GetBlockName() + "->" + BlockT::GetName());
+
+		std::unique_ptr<BlockT> blk = std::make_unique<BlockT>(parent);
 		return blk;
 	}
 };
@@ -99,26 +119,26 @@ struct BlockCreator
 template <typename RegistrarT>
 struct BlockFactory
 {
-	std::unique_ptr<IBlockBase> Create(const std::string& name)
+	std::unique_ptr<IBlockBase> Create(const std::string& name, IBlockBase* parent)
 	{
 		auto it = mCreators.find(name);
 		if (it == mCreators.cend())
 			throw std::runtime_error("unknown block name: " + name);
 
-		return it->second();
+		return it->second(parent);
 	}
 
 	template <typename BlockT>
 	void Register()
 	{
-		mCreators.emplace(BlockT::GetName(), []()
+		mCreators.emplace(BlockT::GetName(), [](IBlockBase* parent)
 		{
-			return RegistrarT{}.template Create<BlockT>();
+			return RegistrarT{}.template Create<BlockT>(parent);
 		});
 	}
 
 private:
-	using BlockCreator = std::function<std::unique_ptr<IBlockBase>()>;
+	using BlockCreator = std::function<std::unique_ptr<IBlockBase>(IBlockBase*)>;
 
 	std::map<std::string, BlockCreator> mCreators;
 };
@@ -133,20 +153,23 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 	factory.Register<BlockD>();
 
 	std::vector<std::unique_ptr<IBlockBase>> blocks;
+	IBlockBase* parent = nullptr;
 
-	for (auto it = blockNames.crbegin(); it != blockNames.crend(); ++it)
+	//for (auto it = blockNames.crbegin(); it != blockNames.crend(); ++it)
+	//{
+	//	using StringT = typename StringListT::value_type;
+	//	const StringT& blockName = *it;
+	for (const auto& blockName : blockNames)
 	{
-		using StringT = typename  StringListT::value_type;
-		const StringT& blockName = *it;
+		auto newBlock = factory.Create(blockName, parent);
 
-		auto newBlock = factory.Create(blockName);
-
-		if (!blocks.empty() && !blocks.back()->IsValidParent(newBlock.get()))
-		{
-			throw std::runtime_error("invalid link " + newBlock->GetBlockName() + "->" + blocks.back()->GetBlockName());
-		}
+		//if (!blocks.empty() && !blocks.back()->IsValidParent(newBlock.get()))
+		//{
+		//	throw std::runtime_error("invalid link " + newBlock->GetBlockName() + "->" + blocks.back()->GetBlockName());
+		//}
 
 		blocks.push_back(std::move(newBlock));
+		parent = newBlock.get();
 	}
 
 	std::reverse(blocks.begin(), blocks.end());
