@@ -39,54 +39,6 @@ struct IBlock : public IBlockProducer<OutputT>
 	}
 };
 
-struct Square{};
-struct Triangle{};
-struct Circle{};
-
-struct BlockA : public IBlock<BlockA, Square, Triangle>
-{
-	explicit BlockA(IBlockBase*)
-	{}
-
-	static const std::string& GetName() { static const std::string name = "A"; return name; }
-
-	void OnReceive(const Square&) override
-	{}
-};
-
-struct BlockB : public IBlock<BlockB, Triangle, Circle>
-{
-	explicit BlockB(IBlockBase*)
-	{}
-
-	static const std::string& GetName() { static const std::string name = "B"; return name; }
-
-	void OnReceive(const Triangle&) override
-	{}
-};
-
-struct BlockC : public IBlock<BlockC, Circle, Square>
-{
-	explicit BlockC(IBlockBase*)
-	{}
-
-	static const std::string& GetName() { static const std::string name = "C"; return name; }
-
-	void OnReceive(const Circle&) override
-	{}
-};
-
-struct BlockD : public IBlock<BlockD, Triangle, Triangle>
-{
-	explicit BlockD(IBlockBase*)
-	{}
-
-	static const std::string& GetName() { static const std::string name = "D"; return name; }
-
-	void OnReceive(const Triangle&) override
-	{}
-};
-
 template <typename ChildBlockT>
 bool IsValidParent(IBlockBase* parent)
 {
@@ -136,30 +88,36 @@ private:
 	std::map<std::string, BlockCreator> mCreators;
 };
 
-template <typename StringListT>
-std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
+struct FlowFactory
 {
-	BlockFactory<BlockCreator> factory;
-	factory.Register<BlockA>();
-	factory.Register<BlockB>();
-	factory.Register<BlockC>();
-	factory.Register<BlockD>();
-
-	IBlockBase* parent = nullptr;
-	std::vector<std::unique_ptr<IBlockBase>> blocks;
-
-	for (const auto& blockName : blockNames)
+	template <typename BlockT>
+	void Register()
 	{
-		auto newBlock = factory.Create(blockName, parent);
-		parent = newBlock.get();
-
-		blocks.push_back(std::move(newBlock));
+		mFactory.template Register<BlockT>();
 	}
 
-	return blocks;
-}
+	template <typename StringListT>
+	std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
+	{
+		IBlockBase* parent = nullptr;
+		std::vector<std::unique_ptr<IBlockBase>> blocks;
 
-std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const std::vector<std::string>& blockNames)
-{
-	return CreateFlow<std::vector<std::string>>(blockNames);
-}
+		for (const auto& blockName : blockNames)
+		{
+			auto newBlock = mFactory.Create(blockName, parent);
+			parent = newBlock.get();
+
+			blocks.push_back(std::move(newBlock));
+		}
+
+		return blocks;
+	}
+
+	std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const std::vector<std::string>& blockNames)
+	{
+		return CreateFlow<std::vector<std::string>>(blockNames);
+	}
+
+private:
+	BlockFactory<BlockCreator> mFactory;
+};
