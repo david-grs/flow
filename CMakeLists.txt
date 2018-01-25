@@ -11,6 +11,6 @@ endif()
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-add_executable(tests unit_tests.cc)
+add_executable(tests unit_tests.cc flow.h)
 target_compile_options(tests PRIVATE ${cxx_compile_options})
 target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} pthread)
