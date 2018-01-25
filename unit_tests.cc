@@ -1,6 +1,7 @@
 #include "flow.h"
 
-#include <gtest/gtest.h>
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include <iostream>
 
@@ -26,8 +27,12 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 	static const std::string& GetName() { static const std::string name = "B"; return name; }
 
+	MOCK_METHOD0(OnReceive, void());
+
 	void OnReceive(const Triangle&) override
-	{}
+	{
+		OnReceive();
+	}
 };
 
 struct BlockC : public IBlock<BlockC, Circle, Square>
@@ -94,4 +99,14 @@ TEST_F(FlowTest, Invalid)
 	EXPECT_THROW(mFactory.CreateFlow({"B", "B"}), std::runtime_error);
 	EXPECT_THROW(mFactory.CreateFlow({"C", "B"}), std::runtime_error);
 	EXPECT_THROW(mFactory.CreateFlow({"C", "C"}), std::runtime_error);
+}
+
+TEST_F(FlowTest, Send)
+{
+	auto flow = mFactory.CreateFlow({"A", "B"});
+
+	//std::unique_ptr<IBlockBase> blkA = flow[0];
+	//std::unique_ptr<IBlockBase> blkB = flow[1];
+
+	//EXPECT_CALL(blkA.get(), OnReceive());
 }

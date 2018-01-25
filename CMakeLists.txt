@@ -8,9 +8,11 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(cxx_compile_options ${cxx_compile_options} -Wuseless-cast -Wduplicated-cond -Wlogical-op)
 endif()
 
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+include(gtest.cmake)
 
 add_executable(tests unit_tests.cc flow.h)
 target_compile_options(tests PRIVATE ${cxx_compile_options})
-target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} pthread)
+
+find_package (Threads)
+target_link_libraries(tests gtest ${CMAKE_THREAD_LIBS_INIT})
+
