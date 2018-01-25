@@ -54,7 +54,7 @@ struct Circle{};
 
 struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
-	BlockA(IBlockBase*)
+	explicit BlockA(IBlockBase*)
 	{}
 
 	static const std::string& GetName() { static const std::string name = "A"; return name; }
@@ -65,7 +65,7 @@ struct BlockA : public IBlock<BlockA, Square, Triangle>
 
 struct BlockB : public IBlock<BlockB, Triangle, Circle>
 {
-	BlockB(IBlockBase*)
+	explicit BlockB(IBlockBase*)
 	{}
 
 	static const std::string& GetName() { static const std::string name = "B"; return name; }
@@ -76,7 +76,7 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 struct BlockC : public IBlock<BlockC, Circle, Square>
 {
-	BlockC(IBlockBase*)
+	explicit BlockC(IBlockBase*)
 	{}
 
 	static const std::string& GetName() { static const std::string name = "C"; return name; }
@@ -87,7 +87,7 @@ struct BlockC : public IBlock<BlockC, Circle, Square>
 
 struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
-	BlockD(IBlockBase*)
+	explicit BlockD(IBlockBase*)
 	{}
 
 	static const std::string& GetName() { static const std::string name = "D"; return name; }
