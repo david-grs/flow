@@ -1,14 +1,7 @@
-#include "typemap.hpp"
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-
 #include <string>
-#include <iostream>
 #include <vector>
 #include <map>
 #include <memory>
-#include <algorithm>
 #include <functional>
 
 const std::string config = "A-B-C";
@@ -165,21 +158,10 @@ std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockName
 		blocks.push_back(std::move(newBlock));
 	}
 
-	std::reverse(blocks.begin(), blocks.end());
 	return blocks;
 }
 
-int main()
+std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const std::vector<std::string>& blockNames)
 {
-	std::vector<std::string> nodes;
-	boost::split(nodes, config, boost::is_any_of("-"));
-
-	auto flow = CreateFlow(nodes);
-
-	for (const auto& block : flow)
-	{
-		std::cout << "elem='" << block->GetBlockName() << "'" << std::endl;
-	}
-
-	return 0;
+	return CreateFlow<std::vector<std::string>>(blockNames);
 }
