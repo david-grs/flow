@@ -4,8 +4,6 @@
 #include <memory>
 #include <functional>
 
-const std::string config = "A-B-C";
-
 struct IBlockBase
 {
 	virtual ~IBlockBase()
