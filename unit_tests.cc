@@ -105,8 +105,13 @@ TEST_F(FlowTest, Send)
 {
 	auto flow = mFactory.CreateFlow({"A", "B"});
 
-	std::unique_ptr<IBlockBase>& blkA = flow[0];
-	std::unique_ptr<IBlockBase>& blkB = flow[1];
+	BlockA* blkA = dynamic_cast<BlockA*>(flow[0].get());
 
 	EXPECT_EQ(0, bCalls);
+	blkA->Send({});
+
+	EXPECT_EQ(1, bCalls);
+	blkA->Send({});
+
+	EXPECT_EQ(2, bCalls);
 }
