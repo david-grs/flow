@@ -56,7 +56,7 @@ struct BlockCreator
 			throw std::runtime_error("invalid link " + parent->GetBlockName() + "->" + BlockT::GetName());
 		}
 
-		std::unique_ptr<BlockT> blk = std::make_unique<BlockT>(parent);
+		std::unique_ptr<IBlockBase> blk = std::make_unique<BlockT>(parent);
 		return blk;
 	}
 };
