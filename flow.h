@@ -12,15 +12,28 @@ struct IBlockBase
 	virtual const std::string& GetBlockName() const =0;
 };
 
+template <typename InputT>
+struct IBlockConsumer : public IBlockBase
+{
+	virtual ~IBlockConsumer()
+	{}
+
+	virtual void OnReceive(const InputT&) =0;
+};
+
 template <typename OutputT>
 struct IBlockProducer : public IBlockBase
 {
 	virtual ~IBlockProducer()
 	{}
+
+	virtual void Send(const OutputT&) = 0;
 };
 
 template <typename BlockT, typename InputT, typename OutputT>
-struct IBlock : public IBlockProducer<OutputT>
+struct IBlock :
+	public IBlockConsumer<InputT>,
+	public IBlockProducer<OutputT>
 {
 	using block_type = BlockT;
 	using input_type = InputT;
@@ -31,9 +44,7 @@ struct IBlock : public IBlockProducer<OutputT>
 
 	const std::string& GetBlockName() const { return BlockT::GetName(); }
 
-	virtual void OnReceive(const InputT&) =0;
-
-	void Send(const OutputT&)
+	void Send(const OutputT&) override
 	{
 		// TODO
 	}
