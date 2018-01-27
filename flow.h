@@ -69,15 +69,20 @@ bool IsValidParent(IBlockBase* parent)
 struct BlockCreator
 {
 	template <typename BlockT>
-	std::unique_ptr<IBlockBase> Create(IBlockBase* parent)
+	std::unique_ptr<IBlockBase> Create(IBlockBase* parentBase)
 	{
-		if (parent && !IsValidParent<BlockT>(parent))
+		if (!parentBase)
 		{
-			throw std::runtime_error("invalid link " + parent->GetBlockName() + "->" + BlockT::GetName());
+			return std::make_unique<BlockT>();
 		}
 
-		std::unique_ptr<IBlockBase> blk = std::make_unique<BlockT>(parent);
-		return blk;
+		if (!IsValidParent<BlockT>(parentBase))
+		{
+			throw std::runtime_error("invalid link " + parentBase->GetBlockName() + "->" + BlockT::GetName());
+		}
+
+		auto* parent = dynamic_cast<IBlockProducer<typename BlockT::input_type>*>(parentBase);
+		return std::make_unique<BlockT>(parent);
 	}
 };
 

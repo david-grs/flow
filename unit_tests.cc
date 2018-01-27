@@ -13,7 +13,7 @@ static int bCalls = {};
 
 struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
-	explicit BlockA(IBlockBase* parent) :
+	explicit BlockA(IBlockProducer<Square>* parent = nullptr) :
 		IBlock<BlockA, Square, Triangle>(parent)
 	{}
 
@@ -25,7 +25,7 @@ struct BlockA : public IBlock<BlockA, Square, Triangle>
 
 struct BlockB : public IBlock<BlockB, Triangle, Circle>
 {
-	explicit BlockB(IBlockBase* parent) :
+	explicit BlockB(IBlockProducer<Triangle>* parent = nullptr) :
 		IBlock<BlockB, Triangle, Circle>(parent)
 	{}
 
@@ -39,7 +39,7 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 struct BlockC : public IBlock<BlockC, Circle, Square>
 {
-	explicit BlockC(IBlockBase* parent) :
+	explicit BlockC(IBlockProducer<Circle>* parent = nullptr) :
 		IBlock<BlockC, Circle, Square>(parent)
 	{}
 
@@ -51,7 +51,7 @@ struct BlockC : public IBlock<BlockC, Circle, Square>
 
 struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
-	explicit BlockD(IBlockBase* parent) :
+	explicit BlockD(IBlockProducer<Triangle>* parent = nullptr) :
 		IBlock<BlockD, Triangle, Triangle>(parent)
 	{}
 
