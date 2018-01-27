@@ -13,7 +13,7 @@ struct IBlockBase
 };
 
 template <typename InputT>
-struct IBlockConsumer : public IBlockBase
+struct IBlockConsumer : public virtual IBlockBase
 {
 	virtual ~IBlockConsumer()
 	{}
@@ -22,7 +22,7 @@ struct IBlockConsumer : public IBlockBase
 };
 
 template <typename OutputT>
-struct IBlockProducer : public IBlockBase
+struct IBlockProducer : public virtual IBlockBase
 {
 	virtual ~IBlockProducer()
 	{}
@@ -32,7 +32,7 @@ struct IBlockProducer : public IBlockBase
 
 template <typename BlockT, typename InputT, typename OutputT>
 struct IBlock :
-	//public IBlockConsumer<InputT>,
+	public IBlockConsumer<InputT>,
 	public IBlockProducer<OutputT>
 {
 	using block_type = BlockT;
