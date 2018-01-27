@@ -18,17 +18,6 @@ private:
 	std::vector<T> mElements;
 };
 
-template <typename T, typename... Args>
-template <typename K>
-const T& TypeMap<T, Args...>::Get() const
-{
-	return mElements[0];
-}
 
-template <typename T, typename... Args>
-template <typename K>
-T& TypeMap<T, Args...>::Get()
-{
-	return mElements[0];
-}
-
+// TODO impl
+//
