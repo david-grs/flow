@@ -8,8 +8,7 @@ struct Square{};
 struct Triangle{};
 struct Circle{};
 
-// TODO gmock
-static int bCalls = {};
+std::map<std::string, int> Calls;
 
 struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
@@ -20,7 +19,9 @@ struct BlockA : public IBlock<BlockA, Square, Triangle>
 	static const std::string& GetName() { static const std::string name = "A"; return name; }
 
 	void OnReceive(const Square&)
-	{}
+	{
+		FAIL();
+	}
 };
 
 struct BlockB : public IBlock<BlockB, Triangle, Circle>
@@ -33,7 +34,10 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 	void OnReceive(const Triangle&)
 	{
-		++bCalls;
+		if (++Calls[GetName()] % 2 == 0)
+		{
+			Send({});
+		}
 	}
 };
 
@@ -46,7 +50,9 @@ struct BlockC : public IBlock<BlockC, Circle, Square>
 	static const std::string& GetName() { static const std::string name = "C"; return name; }
 
 	void OnReceive(const Circle&)
-	{}
+	{
+		++Calls[GetName()];
+	}
 };
 
 struct BlockD : public IBlock<BlockD, Triangle, Triangle>
@@ -58,7 +64,9 @@ struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 	static const std::string& GetName() { static const std::string name = "D"; return name; }
 
 	void OnReceive(const Triangle&)
-	{}
+	{
+		++Calls[GetName()];
+	}
 };
 
 struct FlowTest : public  ::testing::Test
@@ -107,15 +115,17 @@ TEST_F(FlowTest, Invalid)
 
 TEST_F(FlowTest, Send)
 {
-	auto flow = mFactory.CreateFlow({"A", "B"});
+	auto flow = mFactory.CreateFlow({"A", "B", "C"});
 
 	BlockA* blkA = dynamic_cast<BlockA*>(flow[0].get());
 
-	EXPECT_EQ(0, bCalls);
-	blkA->Send({});
+	EXPECT_TRUE(Calls.empty());
 
-	EXPECT_EQ(1, bCalls);
 	blkA->Send({});
+	EXPECT_EQ(1, Calls["B"]);
+	EXPECT_EQ(0, Calls["C"]);
 
-	EXPECT_EQ(2, bCalls);
+	blkA->Send({});
+	EXPECT_EQ(2, Calls["B"]);
+	EXPECT_EQ(1, Calls["C"]);
 }
