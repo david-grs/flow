@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <algorithm>
 #include <functional>
 
 struct IBlockBase
@@ -39,10 +40,9 @@ struct IBlock :
 	using input_type = InputT;
 	using output_type = OutputT;
 
-	explicit IBlock(IBlockBase* parent) :
-		mParent(parent)
+	explicit IBlock(IBlockConsumer<OutputT>* child) :
+		mChild(child)
 	{
-
 	}
 
 	virtual ~IBlock()
@@ -50,60 +50,60 @@ struct IBlock :
 
 	const std::string& GetBlockName() const override { return BlockT::GetName(); }
 
-	void Send(const OutputT&) override
+	void Send(const OutputT& t) override
 	{
-		// TODO
+		mChild->OnReceive(t);
 	}
 
 private:
-	IBlockBase* mParent;
+	IBlockConsumer<OutputT>* mChild;
 };
 
-template <typename ChildBlockT>
-bool IsValidParent(IBlockBase* parent)
+template <typename BlockT>
+bool IsValidChild(IBlockBase* child)
 {
-	using InputT = typename ChildBlockT::input_type;
-	return dynamic_cast<IBlockProducer<InputT>*>(parent) != nullptr;
+	using OutputT = typename BlockT::output_type;
+	return dynamic_cast<IBlockConsumer<OutputT>*>(child) != nullptr;
 }
 
 struct BlockCreator
 {
 	template <typename BlockT>
-	std::unique_ptr<IBlockBase> Create(IBlockBase* parentBase)
+	std::unique_ptr<IBlockBase> Create(IBlockBase* childBase)
 	{
-		if (!parentBase)
+		if (!childBase)
 		{
 			return std::make_unique<BlockT>();
 		}
 
-		if (!IsValidParent<BlockT>(parentBase))
+		if (!IsValidChild<BlockT>(childBase))
 		{
-			throw std::runtime_error("invalid link " + parentBase->GetBlockName() + "->" + BlockT::GetName());
+			throw std::runtime_error("invalid link " + BlockT::GetName() + "->" + childBase->GetBlockName());
 		}
 
-		auto* parent = dynamic_cast<IBlockProducer<typename BlockT::input_type>*>(parentBase);
-		return std::make_unique<BlockT>(parent);
+		auto* child = dynamic_cast<IBlockConsumer<typename BlockT::output_type>*>(childBase);
+		return std::make_unique<BlockT>(child);
 	}
 };
 
 template <typename CreatorT>
 struct BlockFactory
 {
-	std::unique_ptr<IBlockBase> Create(const std::string& name, IBlockBase* parent)
+	std::unique_ptr<IBlockBase> Create(const std::string& name, IBlockBase* child)
 	{
 		auto it = mCreators.find(name);
 		if (it == mCreators.cend())
 			throw std::runtime_error("unknown block name: " + name);
 
-		return it->second(parent);
+		return it->second(child);
 	}
 
 	template <typename BlockT>
 	void Register()
 	{
-		mCreators.emplace(BlockT::GetName(), [](IBlockBase* parent)
+		mCreators.emplace(BlockT::GetName(), [](IBlockBase* child)
 		{
-			return CreatorT{}.template Create<BlockT>(parent);
+			return CreatorT{}.template Create<BlockT>(child);
 		});
 	}
 
@@ -124,17 +124,21 @@ struct FlowFactory
 	template <typename StringListT>
 	std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
 	{
-		IBlockBase* parent = nullptr;
+		IBlockBase* child = nullptr;
 		std::vector<std::unique_ptr<IBlockBase>> blocks;
 
-		for (const auto& blockName : blockNames)
+		for (auto it = blockNames.crbegin(); it != blockNames.crend(); ++it)
 		{
-			auto newBlock = mFactory.Create(blockName, parent);
-			parent = newBlock.get();
+			using StringT = typename StringListT::value_type;
+			const StringT& blockName = *it;
+
+			auto newBlock = mFactory.Create(blockName, child);
+			child = newBlock.get();
 
 			blocks.push_back(std::move(newBlock));
 		}
 
+		std::reverse(blocks.begin(), blocks.end());
 		return blocks;
 	}
 
