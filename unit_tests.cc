@@ -13,23 +13,25 @@ static int bCalls = {};
 
 struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
-	explicit BlockA(IBlockBase*)
+	explicit BlockA(IBlockBase* parent) :
+		IBlock<BlockA, Square, Triangle>(parent)
 	{}
 
 	static const std::string& GetName() { static const std::string name = "A"; return name; }
 
-	void OnReceive(const Square&) override
+	void OnReceive(const Square&)
 	{}
 };
 
 struct BlockB : public IBlock<BlockB, Triangle, Circle>
 {
-	explicit BlockB(IBlockBase*)
+	explicit BlockB(IBlockBase* parent) :
+		IBlock<BlockB, Triangle, Circle>(parent)
 	{}
 
 	static const std::string& GetName() { static const std::string name = "B"; return name; }
 
-	void OnReceive(const Triangle&) override
+	void OnReceive(const Triangle&)
 	{
 		++bCalls;
 	}
@@ -37,23 +39,25 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 struct BlockC : public IBlock<BlockC, Circle, Square>
 {
-	explicit BlockC(IBlockBase*)
+	explicit BlockC(IBlockBase* parent) :
+		IBlock<BlockC, Circle, Square>(parent)
 	{}
 
 	static const std::string& GetName() { static const std::string name = "C"; return name; }
 
-	void OnReceive(const Circle&) override
+	void OnReceive(const Circle&)
 	{}
 };
 
 struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
-	explicit BlockD(IBlockBase*)
+	explicit BlockD(IBlockBase* parent) :
+		IBlock<BlockD, Triangle, Triangle>(parent)
 	{}
 
 	static const std::string& GetName() { static const std::string name = "D"; return name; }
 
-	void OnReceive(const Triangle&) override
+	void OnReceive(const Triangle&)
 	{}
 };
 

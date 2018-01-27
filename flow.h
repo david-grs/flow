@@ -32,22 +32,31 @@ struct IBlockProducer : public IBlockBase
 
 template <typename BlockT, typename InputT, typename OutputT>
 struct IBlock :
-	public IBlockConsumer<InputT>,
+	//public IBlockConsumer<InputT>,
 	public IBlockProducer<OutputT>
 {
 	using block_type = BlockT;
 	using input_type = InputT;
 	using output_type = OutputT;
 
+	explicit IBlock(IBlockBase* parent) :
+		mParent(parent)
+	{
+
+	}
+
 	virtual ~IBlock()
 	{}
 
-	const std::string& GetBlockName() const { return BlockT::GetName(); }
+	const std::string& GetBlockName() const override { return BlockT::GetName(); }
 
 	void Send(const OutputT&) override
 	{
 		// TODO
 	}
+
+private:
+	IBlockBase* mParent;
 };
 
 template <typename ChildBlockT>
