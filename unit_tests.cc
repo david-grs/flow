@@ -12,10 +12,6 @@ std::map<std::string, int> Calls;
 
 struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
-	explicit BlockA(IBlockConsumer<Triangle>* child = nullptr) :
-		IBlock<BlockA, Square, Triangle>(child)
-	{}
-
 	static const std::string& GetName() { static const std::string name = "A"; return name; }
 
 	void OnReceive(const Square&)
@@ -26,10 +22,6 @@ struct BlockA : public IBlock<BlockA, Square, Triangle>
 
 struct BlockB : public IBlock<BlockB, Triangle, Circle>
 {
-	explicit BlockB(IBlockConsumer<Circle>* child = nullptr) :
-		IBlock<BlockB, Triangle, Circle>(child)
-	{}
-
 	static const std::string& GetName() { static const std::string name = "B"; return name; }
 
 	void OnReceive(const Triangle&)
@@ -43,10 +35,6 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 struct BlockC : public IBlock<BlockC, Circle, Square>
 {
-	explicit BlockC(IBlockConsumer<Square>* child= nullptr) :
-		IBlock<BlockC, Circle, Square>(child)
-	{}
-
 	static const std::string& GetName() { static const std::string name = "C"; return name; }
 
 	void OnReceive(const Circle&)
@@ -57,10 +45,6 @@ struct BlockC : public IBlock<BlockC, Circle, Square>
 
 struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
-	explicit BlockD(IBlockConsumer<Triangle>* child = nullptr) :
-		IBlock<BlockD, Triangle, Triangle>(child)
-	{}
-
 	static const std::string& GetName() { static const std::string name = "D"; return name; }
 
 	void OnReceive(const Triangle&)

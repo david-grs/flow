@@ -4,6 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <functional>
+#include <cassert>
 
 struct IBlockBase
 {
@@ -40,15 +41,16 @@ struct IBlock :
 	using input_type = InputT;
 	using output_type = OutputT;
 
-	explicit IBlock(IBlockConsumer<OutputT>* child) :
-		mChild(child)
-	{
-	}
-
 	virtual ~IBlock()
 	{}
 
 	const std::string& GetBlockName() const override { return BlockT::GetName(); }
+
+	void SetChildBlock(IBlockConsumer<OutputT>* child)
+	{
+		assert(mChild);
+		mChild = child;
+	}
 
 	void Send(const OutputT& t) override
 	{
@@ -56,7 +58,7 @@ struct IBlock :
 	}
 
 private:
-	IBlockConsumer<OutputT>* mChild;
+	IBlockConsumer<OutputT>* mChild = nullptr;
 };
 
 template <typename BlockT>
@@ -81,8 +83,12 @@ struct BlockCreator
 			throw std::runtime_error("invalid link " + BlockT::GetName() + "->" + childBase->GetBlockName());
 		}
 
+		std::unique_ptr<BlockT> newBlock = std::make_unique<BlockT>();
+
 		auto* child = dynamic_cast<IBlockConsumer<typename BlockT::output_type>*>(childBase);
-		return std::make_unique<BlockT>(child);
+		newBlock->SetChildBlock(child);
+
+		return newBlock;
 	}
 };
 
