@@ -2,13 +2,15 @@
 
 #include "gtest/gtest.h"
 
+#include <map>
+#include <string>
 #include <iostream>
 
 struct Square{};
 struct Triangle{};
 struct Circle{};
 
-std::map<std::string, int> Calls;
+static std::map<std::string, int> Calls;
 
 struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
@@ -67,14 +69,14 @@ protected:
 	FlowFactory mFactory;
 };
 
-TEST_F(FlowTest, Basic)
+TEST_F(FlowTest, GetBlockName)
 {
 	auto flow = mFactory.CreateFlow({"A", "B", "C"});
 
-	for (const auto& block : flow)
-	{
-		std::cout << "block='" << block->GetBlockName() << "'" << std::endl;
-	}
+	EXPECT_EQ(3, flow.size());
+	EXPECT_EQ("A", flow[0]->GetBlockName());
+	EXPECT_EQ("B", flow[1]->GetBlockName());
+	EXPECT_EQ("C", flow[2]->GetBlockName());
 }
 
 TEST_F(FlowTest, Valid)
