@@ -15,7 +15,7 @@ struct IBlockBase
 };
 
 template <typename InputT>
-struct IBlockConsumer : public virtual IBlockBase
+struct IBlockConsumer : public IBlockBase
 {
 	virtual ~IBlockConsumer()
 	{}
@@ -23,19 +23,9 @@ struct IBlockConsumer : public virtual IBlockBase
 	virtual void OnReceive(const InputT&) =0;
 };
 
-template <typename OutputT>
-struct IBlockProducer : public virtual IBlockBase
-{
-	virtual ~IBlockProducer()
-	{}
-
-	virtual void Send(const OutputT&) = 0;
-};
-
 template <typename BlockT, typename InputT, typename OutputT>
 struct IBlock :
-	public IBlockConsumer<InputT>,
-	public IBlockProducer<OutputT>
+	public IBlockConsumer<InputT>
 {
 	using block_type = BlockT;
 	using input_type = InputT;
@@ -52,7 +42,7 @@ struct IBlock :
 		mChild = child;
 	}
 
-	void Send(const OutputT& t) override
+	void Send(const OutputT& t)
 	{
 		mChild->OnReceive(t);
 	}
