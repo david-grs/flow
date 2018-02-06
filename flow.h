@@ -125,7 +125,21 @@ struct BlockFactory
 	}
 
 	template <typename BlockT>
-	void Register()
+	std::enable_if_t<std::is_same<typename BlockT::output_type, void>::value> Register()
+	{
+		mCreators.emplace(BlockT::GetName(), [](IBlockBase* child)
+		{
+			if (child)
+			{
+				throw std::runtime_error("unexpected child");
+			}
+
+			return CreatorT{}.template Create<BlockT>(child);
+		});
+	}
+
+	template <typename BlockT>
+	std::enable_if_t<!std::is_same<typename BlockT::output_type, void>::value> Register()
 	{
 		mCreators.emplace(BlockT::GetName(), [](IBlockBase* child)
 		{
