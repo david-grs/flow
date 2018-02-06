@@ -15,7 +15,7 @@ struct IBlockBase
 };
 
 template <typename InputT>
-struct IBlockConsumer : public IBlockBase
+struct IBlockConsumer : virtual public IBlockBase
 {
 	virtual ~IBlockConsumer()
 	{}
@@ -23,18 +23,11 @@ struct IBlockConsumer : public IBlockBase
 	virtual void OnReceive(const InputT&) =0;
 };
 
-template <typename BlockT, typename InputT, typename OutputT>
-struct IBlock :
-	public IBlockConsumer<InputT>
+template <typename OutputT>
+struct IBlockProducer : virtual public IBlockBase
 {
-	using block_type = BlockT;
-	using input_type = InputT;
-	using output_type = OutputT;
-
-	virtual ~IBlock()
+	virtual ~IBlockProducer()
 	{}
-
-	const std::string& GetBlockName() const override { return BlockT::GetName(); }
 
 	void SetChildBlock(IBlockConsumer<OutputT>* child)
 	{
@@ -49,6 +42,21 @@ struct IBlock :
 
 private:
 	IBlockConsumer<OutputT>* mChild = nullptr;
+};
+
+template <typename BlockT, typename InputT, typename OutputT>
+struct IBlock :
+	public IBlockConsumer<InputT>,
+	public IBlockProducer<OutputT>
+{
+	using block_type = BlockT;
+	using input_type = InputT;
+	using output_type = OutputT;
+
+	virtual ~IBlock()
+	{}
+
+	const std::string& GetBlockName() const override { return BlockT::GetName(); }
 };
 
 template <typename BlockT>
