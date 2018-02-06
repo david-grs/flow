@@ -37,6 +37,12 @@ struct IBlockProducer : virtual public IBlockBase
 
 	void Send(const OutputT& t)
 	{
+		if (!mChild)
+		{
+			assert(false);
+			return;
+		}
+
 		mChild->OnReceive(t);
 	}
 
