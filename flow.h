@@ -31,7 +31,7 @@ struct IBlockProducer : virtual public IBlockBase
 
 	void SetChildBlock(IBlockConsumer<OutputT>* child)
 	{
-		assert(mChild);
+		assert(!mChild);
 		mChild = child;
 	}
 
