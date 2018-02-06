@@ -23,6 +23,15 @@ struct IBlockConsumer : virtual public IBlockBase
 	virtual void OnReceive(const InputT&) =0;
 };
 
+template <>
+struct IBlockConsumer<void> : virtual public IBlockBase
+{
+	virtual ~IBlockConsumer()
+	{}
+
+	virtual void OnReceive() {}
+};
+
 template <typename OutputT>
 struct IBlockProducer : virtual public IBlockBase
 {
@@ -48,6 +57,13 @@ struct IBlockProducer : virtual public IBlockBase
 
 private:
 	IBlockConsumer<OutputT>* mChild = nullptr;
+};
+
+template <>
+struct IBlockProducer<void> : virtual public IBlockBase
+{
+	virtual ~IBlockProducer()
+	{}
 };
 
 template <typename BlockT, typename InputT, typename OutputT>
