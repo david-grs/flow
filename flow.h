@@ -28,8 +28,6 @@ struct IBlockConsumer<void> : virtual public IBlockBase
 {
 	virtual ~IBlockConsumer()
 	{}
-
-	virtual void OnReceive() {}
 };
 
 template <typename OutputT>
