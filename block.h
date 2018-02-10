@@ -23,6 +23,8 @@ struct IBlockConsumer<void> : virtual public IBlockBase
 {
 	virtual ~IBlockConsumer()
 	{}
+
+	virtual void Process() { }
 };
 
 template <typename OutputT>
