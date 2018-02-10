@@ -16,7 +16,7 @@ struct BlockA : public IBlock<BlockA, Square, Triangle>
 {
 	static const std::string& GetName() { static const std::string name = "A"; return name; }
 
-	void OnReceive(const Square&)
+	void Process(const Square&)
 	{
 		FAIL();
 	}
@@ -26,7 +26,7 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 {
 	static const std::string& GetName() { static const std::string name = "B"; return name; }
 
-	void OnReceive(const Triangle&)
+	void Process(const Triangle&)
 	{
 		if (++Calls[GetName()] % 2 == 0)
 		{
@@ -39,7 +39,7 @@ struct BlockC : public IBlock<BlockC, Circle, Square>
 {
 	static const std::string& GetName() { static const std::string name = "C"; return name; }
 
-	void OnReceive(const Circle&)
+	void Process(const Circle&)
 	{
 		++Calls[GetName()];
 	}
@@ -49,7 +49,7 @@ struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
 	static const std::string& GetName() { static const std::string name = "D"; return name; }
 
-	void OnReceive(const Triangle&)
+	void Process(const Triangle&)
 	{
 		++Calls[GetName()];
 	}

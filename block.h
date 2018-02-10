@@ -15,7 +15,7 @@ struct IBlockConsumer : virtual public IBlockBase
 	virtual ~IBlockConsumer()
 	{}
 
-	virtual void OnReceive(const InputT&) =0;
+	virtual void Process(const InputT&) =0;
 };
 
 template <>
@@ -45,7 +45,7 @@ struct IBlockProducer : virtual public IBlockBase
 			return;
 		}
 
-		mChild->OnReceive(t);
+		mChild->Process(t);
 	}
 
 private:
