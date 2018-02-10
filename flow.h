@@ -30,6 +30,13 @@ struct FlowFactory
 		}
 
 		std::reverse(blocks.begin(), blocks.end());
+
+		{
+			auto* firstBlock = blocks[0].get();
+
+			if (!dynamic_cast<IBlockConsumer<void>*>(firstBlock))
+				throw std::runtime_error("unexpected first block");
+		}
 		return blocks;
 	}
 
