@@ -4,6 +4,8 @@
 #include <memory>
 #include <algorithm>
 
+using Flow = std::vector<std::unique_ptr<IBlockBase>>;
+
 struct FlowFactory
 {
 	template <typename BlockT>
@@ -13,7 +15,7 @@ struct FlowFactory
 	}
 
 	template <typename StringListT>
-	std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const StringListT& blockNames)
+	Flow CreateFlow(const StringListT& blockNames)
 	{
 		IBlockBase* child = nullptr;
 		std::vector<std::unique_ptr<IBlockBase>> blocks;
@@ -40,7 +42,7 @@ struct FlowFactory
 		return blocks;
 	}
 
-	std::vector<std::unique_ptr<IBlockBase>> CreateFlow(const std::vector<std::string>& blockNames)
+	Flow CreateFlow(const std::vector<std::string>& blockNames)
 	{
 		return CreateFlow<std::vector<std::string>>(blockNames);
 	}
