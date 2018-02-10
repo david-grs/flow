@@ -38,7 +38,7 @@ struct IBlockProducer : virtual public IBlockBase
 
 	void SetChildBlock(IBlockConsumer<OutputT>* child)
 	{
-		assert(!mChild);
+		assert(!mChild && child);
 		mChild = child;
 	}
 
@@ -89,6 +89,12 @@ bool IsValidChild(IBlockBase* child)
 struct BlockCreator
 {
 	template <typename BlockT>
+	std::unique_ptr<IBlockBase> Create()
+	{
+		return std::make_unique<BlockT>();
+	}
+
+	template <typename BlockT>
 	std::unique_ptr<IBlockBase> Create(IBlockBase* childBase)
 	{
 		if (!childBase)
@@ -132,7 +138,7 @@ struct BlockFactory
 				throw std::runtime_error("unexpected child");
 			}
 
-			return CreatorT{}.template Create<BlockT>(child);
+			return CreatorT{}.template Create<BlockT>();
 		});
 	}
 
