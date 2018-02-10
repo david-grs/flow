@@ -10,7 +10,7 @@ endif()
 
 include(gtest.cmake)
 
-add_executable(tests unit_tests.cc flow.h)
+add_executable(tests unit_tests.cc flow.h block.h block_factory.h)
 target_compile_options(tests PRIVATE ${cxx_compile_options})
 
 find_package (Threads)
