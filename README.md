@@ -1,3 +1,13 @@
 flow
 ====
-Sample workflow based class in C++
+Simple workflow class
+
+```
+FlowFactory factory;
+factory.Register<BlockA>();
+factory.Register<BlockB>();
+factory.Register<BlockC>();
+
+auto flow = factory.CreateFlow({"A", "B", "C"});
+flow.Run();
+```
