@@ -115,3 +115,10 @@ TEST_F(FlowTest, Send)
 	EXPECT_EQ(2, Calls["B"]);
 	EXPECT_EQ(1, Calls["C"]);
 }
+
+
+TEST_F(FlowTest, Run)
+{
+	auto flow = mFactory.CreateFlow({"A", "B", "C"});
+	flow.Run();
+}
