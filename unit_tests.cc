@@ -14,7 +14,7 @@ static std::map<std::string, int> Calls;
 
 struct BlockA : public IBlock<BlockA, void, Triangle>
 {
-	static const std::string& GetName() { static const std::string name = "A"; return name; }
+	static std::string GetName() { return "A"; }
 
 	void Process(const Square&)
 	{
@@ -24,7 +24,7 @@ struct BlockA : public IBlock<BlockA, void, Triangle>
 
 struct BlockB : public IBlock<BlockB, Triangle, Circle>
 {
-	static const std::string& GetName() { static const std::string name = "B"; return name; }
+	static std::string GetName() { return "B"; }
 
 	void Process(const Triangle&)
 	{
@@ -37,7 +37,7 @@ struct BlockB : public IBlock<BlockB, Triangle, Circle>
 
 struct BlockC : public IBlock<BlockC, Circle, Square>
 {
-	static const std::string& GetName() { static const std::string name = "C"; return name; }
+	static std::string GetName() { return "C"; }
 
 	void Process(const Circle&)
 	{
@@ -47,7 +47,7 @@ struct BlockC : public IBlock<BlockC, Circle, Square>
 
 struct BlockD : public IBlock<BlockD, Triangle, Triangle>
 {
-	static const std::string& GetName() { static const std::string name = "D"; return name; }
+	static std::string GetName() { return "D"; }
 
 	void Process(const Triangle&)
 	{

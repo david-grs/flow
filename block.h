@@ -6,7 +6,7 @@ struct IBlockBase
 	virtual ~IBlockBase()
 	{}
 
-	virtual const std::string& GetBlockName() const =0;
+	virtual std::string GetBlockName() const =0;
 };
 
 template <typename InputT>
@@ -73,6 +73,6 @@ struct IBlock :
 	virtual ~IBlock()
 	{}
 
-	const std::string& GetBlockName() const override { return BlockT::GetName(); }
+	std::string GetBlockName() const override { return BlockT::GetName(); }
 };
 
