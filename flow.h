@@ -4,7 +4,31 @@
 #include <memory>
 #include <algorithm>
 
-using Flow = std::vector<std::unique_ptr<IBlockBase>>;
+struct Flow
+{
+	explicit Flow(std::vector<std::unique_ptr<IBlockBase>>&& blocks) :
+		mBlocks(std::move(blocks))
+	{
+		mFirstBlock = dynamic_cast<IBlockConsumer<void>*>(mBlocks[0].get());
+
+		if (!mFirstBlock)
+		{
+			throw std::runtime_error("unexpected first block");
+		}
+	}
+
+	void Run()
+	{
+		mFirstBlock->Process();
+	}
+
+	std::size_t size() const { return mBlocks.size(); }
+	std::unique_ptr<IBlockBase>& operator[](std::size_t i) { return mBlocks[i]; }
+
+private:
+	std::vector<std::unique_ptr<IBlockBase>> mBlocks;
+	IBlockConsumer<void>* mFirstBlock;
+};
 
 struct FlowFactory
 {
@@ -32,14 +56,7 @@ struct FlowFactory
 		}
 
 		std::reverse(blocks.begin(), blocks.end());
-
-		{
-			auto* firstBlock = blocks[0].get();
-
-			if (!dynamic_cast<IBlockConsumer<void>*>(firstBlock))
-				throw std::runtime_error("unexpected first block");
-		}
-		return blocks;
+		return Flow(std::move(blocks));
 	}
 
 	Flow CreateFlow(const std::vector<std::string>& blockNames)
