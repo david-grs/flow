@@ -23,6 +23,11 @@ struct BlockCreator
 	template <typename BlockT>
 	std::unique_ptr<IBlockBase> Create(IBlockBase* childBase)
 	{
+		if (!childBase)
+		{
+			return Create<BlockT>();
+		}
+
 		if (!IsValidChild<BlockT>(childBase))
 		{
 			throw std::runtime_error("invalid link " + BlockT::GetName() + "->" + childBase->GetBlockName());
