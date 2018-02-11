@@ -12,7 +12,7 @@ struct Circle{};
 
 static std::map<std::string, int> Calls;
 
-struct BlockA : public IBlock<BlockA, Square, Triangle>
+struct BlockA : public IBlock<BlockA, void, Triangle>
 {
 	static const std::string& GetName() { static const std::string name = "A"; return name; }
 
@@ -83,20 +83,20 @@ TEST_F(FlowTest, Valid)
 {
 	EXPECT_NO_THROW(mFactory.CreateFlow({"A"}));
 	EXPECT_NO_THROW(mFactory.CreateFlow({"A", "B"}));
-	EXPECT_NO_THROW(mFactory.CreateFlow({"B", "C"}));
-	EXPECT_NO_THROW(mFactory.CreateFlow({"C", "A"}));
-	EXPECT_NO_THROW(mFactory.CreateFlow({"D", "D"}));
-	EXPECT_NO_THROW(mFactory.CreateFlow({"A", "D", "D", "B", "C", "A"}));
+	EXPECT_NO_THROW(mFactory.CreateFlow({"A", "D", "D", "B", "C"}));
 }
 
 TEST_F(FlowTest, Invalid)
 {
-	EXPECT_THROW(mFactory.CreateFlow({"A", "A"}), std::runtime_error);
-	EXPECT_THROW(mFactory.CreateFlow({"A", "C"}), std::runtime_error);
-	EXPECT_THROW(mFactory.CreateFlow({"B", "A"}), std::runtime_error);
-	EXPECT_THROW(mFactory.CreateFlow({"B", "B"}), std::runtime_error);
-	EXPECT_THROW(mFactory.CreateFlow({"C", "B"}), std::runtime_error);
-	EXPECT_THROW(mFactory.CreateFlow({"C", "C"}), std::runtime_error);
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"C", "A"}));
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"D", "D"}));
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"B", "C"}));
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"A", "A"}));
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"A", "C"}));
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"B", "A"}));
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"B", "B"}));
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"C", "B"}));
+	EXPECT_ANY_THROW(mFactory.CreateFlow({"C", "C"}));
 }
 
 TEST_F(FlowTest, Send)
